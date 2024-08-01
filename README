@@ -1,3 +1,15 @@
+支持GD32H7xx系列烧录的版本
+使用方法：将编译后的openocd替换掉以前的openocd，然后使用stm32h7x.cfg
+
+gd32h7xx.cfg
+"
+source [find interface/cmsis-dap.cfg]
+transport select swd
+source [find target/stm32h7x.cfg]
+reset_config none
+"
+
+
 Welcome to OpenOCD!
 ===================
 

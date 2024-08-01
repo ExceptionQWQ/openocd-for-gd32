@@ -11,6 +11,8 @@
 *.la
 *.in
 
+.DS_Store
+
 # generated source files
 src/jtag/minidriver_imp.h
 src/jtag/jtag_minidriver.h

@@ -21,49 +21,126 @@
 /* Same Flash registers for both banks, */
 /* access depends on Flash Base address */
 #define FLASH_ACR       0x00
-#define FLASH_KEYR      0x04
-#define FLASH_OPTKEYR   0x08
-#define FLASH_CR        0x0C
-#define FLASH_SR        0x10
-#define FLASH_CCR       0x14
-#define FLASH_OPTCR     0x18
-#define FLASH_OPTSR_CUR 0x1C
-#define FLASH_OPTSR_PRG 0x20
+#define FLASH_KEYR      0x04 //解锁寄存器(FMC_KEY)
+#define FLASH_OPTKEYR   0x08 //选项字节操作解锁寄存器(FMC_OBKEY)
+#define FLASH_CR        0x0C //控制寄存器(FMC_CTL)
+#define FLASH_SR        0x10 //状态寄存器(FMC_STAT)
+#define FLASH_CCR       0x14 //地址寄存器(FMC_ADDR)
+#define FLASH_OPTCR     0x18 //选项字节控制寄存器(FMC_OBCTL)
+#define FLASH_OPTSR_CUR 0x1C //选项字节状态寄存器 0(FMC_OBSTAT0_EFT)
+#define FLASH_OPTSR_PRG 0x20 //选项字节状态寄存器 0(FMC_OBSTAT0_MDF)
+
+#define FLASH_DCRPADDR_EFT 0x28 //DCRP 地址寄存器(FMC_DCRPADDR_EFT)
+#define FLASH_DCRPADDR_MDF 0x2c //DCRP 地址寄存器(FMC_DCRPADDR_MDF)
+#define FLASH_SCRADDR_EFT  0x30 //安全用户区域地址寄存器(FMC_SCRADDR_EFT)
+#define FLASH_SCRADDR_MDF  0x34 //安全用户区域地址寄存器(FMC_SCRADDR_MDF)
+
+#define FLASH_WP_EFT       0x38 //擦除/编程保护寄存器(FMC_WP_EFT)
+#define FLASH_WP_MDF       0x3c //擦除/编程保护寄存器(FMC_WP_MDF)
+#define FLASH_BTADDR_EFT   0x40 //引导装载地址寄存器(FMC_BTADDR_EFT)
+#define FLASH_OBSTAT1_EFT  0x50 //选项字节状态寄存器 1(FMC_OBSTAT1_EFT)
+#define FLASH_OBSTAT1_MDF  0x54 //选项字节状态寄存器 1(FMC_OBSTAT1_MDF)
+
+
+
 #define FLASH_OPTCCR    0x24
 #define FLASH_WPSN_CUR  0x38
 #define FLASH_WPSN_PRG  0x3C
 
 
 /* FLASH_CR register bits */
-#define FLASH_LOCK     (1 << 0)
-#define FLASH_PG       (1 << 1)
-#define FLASH_SER      (1 << 2)
+//FMC_CTL 寄存器锁定标志位
+//当正确的序列写入 FMC_KEY 寄存器，此位由硬件清 0。此位可以由软件置 1。
+#define FLASH_LOCK     (1 << 0) 
+
+//主存储闪存块编程命令位
+//当 LK 设置为 0 时，该位才能被软件置 1 和清 0。
+//0:无作用
+//1:主存储闪存块编程命令
+#define FLASH_PG       (1 << 1) 
+
+//扇区擦除命令位
+//当 LK 设置为 0 时，该位才能被软件置 1 和清 0。
+//0:无作用
+//1:扇区擦除命令
+//如果同时请求整片擦除和扇区擦除，则整片擦除将替代扇区擦除操作。
+#define FLASH_SER      (1 << 2) 
+
+//整片擦除命令位
+//当 LK 设置为 0 时，该位才能被软件置 1 和清 0。
+//0:无作用
+//1:整片擦除命令
+//如果同时请求整片擦除和扇区擦除，则整片擦除将替代扇区擦除操作。
 #define FLASH_BER      (1 << 3)
-#define FLASH_PSIZE_8  (0 << 4)
-#define FLASH_PSIZE_16 (1 << 4)
-#define FLASH_PSIZE_32 (2 << 4)
-#define FLASH_PSIZE_64 (3 << 4)
-#define FLASH_FW       (1 << 6)
+
+//编程区域检查使能位
+//当 LK 设置为 0 时，该位才能被软件置 1 和清 0。
+//0:编程前不去检查编程区域数据是否为全 0xFF
+//1:编程前去检查编程区域数据是否为全 0xFF
+//若该位置 1，且编程区域数据不全为 0xFF 时，PGSERR 将会置位。且该编程操作无效。
+#define FLASH_PGCHEN   (1 << 4) 
+
+//向 FMC 发送擦除命令位
+//当 LK 设置为 0 时，该位才能被软件置 1，发送擦除命令到 FMC。
+//当 BUSY 位被清 0 时，此位由硬件清 0。
 #define FLASH_START    (1 << 7)
 
-/* FLASH_SR register bits */
-#define FLASH_BSY      (1 << 0)  /* Operation in progress */
-#define FLASH_QW       (1 << 2)  /* Operation queue in progress */
-#define FLASH_WRPERR   (1 << 17) /* Write protection error */
-#define FLASH_PGSERR   (1 << 18) /* Programming sequence error */
-#define FLASH_STRBERR  (1 << 19) /* Strobe error */
-#define FLASH_INCERR   (1 << 21) /* Inconsistency error */
-#define FLASH_OPERR    (1 << 22) /* Operation error */
-#define FLASH_RDPERR   (1 << 23) /* Read Protection error */
-#define FLASH_RDSERR   (1 << 24) /* Secure Protection error */
-#define FLASH_SNECCERR (1 << 25) /* Single ECC error */
-#define FLASH_DBECCERR (1 << 26) /* Double ECC error */
 
-#define FLASH_ERROR (FLASH_WRPERR | FLASH_PGSERR | FLASH_STRBERR | FLASH_INCERR | FLASH_OPERR | \
-					 FLASH_RDPERR | FLASH_RDSERR | FLASH_SNECCERR | FLASH_DBECCERR)
+
+/* FLASH_SR register bits */
+
+
+//闪存忙标志位
+//当闪存操作正在进行时，此位被置 1。当操作结束或者出错，此位被清 0。
+#define FLASH_BSY      (1 << 0)  
+
+//操作结束标志位
+//当操作执行成功，此位被硬件置 1。软件写 1 清 0。
+#define FLASH_ENDF     (1 << 16)
+
+//擦除/编程保护错误标志位
+//该位由硬件置位，软件写 1 清 0。
+//0:未发生擦除/编程保护错误
+//1:发生擦除/编程保护错误
+#define FLASH_WRPERR   (1 << 17)
+
+//编程顺序错误标志位
+//该位由硬件置位，软件写 1 清 0。
+//0:未发生编程顺序错误
+//1:发生编程顺序错误
+#define FLASH_PGSERR   (1 << 18) 
+
+//读保护错误标志位
+//该位由硬件置位，软件写 1 清 0。
+//0:未发生读保护错误
+//1:发生读保护错误
+#define FLASH_RDPERR   (1 << 23)
+
+//读安全错误标志位
+//该位由硬件置位，软件写 1 清 0。
+//0:未发生读安全错误
+//1:发生读安全错误
+#define FLASH_RDSERR   (1 << 24) 
+
+//选项字节修改错误标志位
+//该位由硬件置位，软件写 1 清 0。
+//0:未发生选项字节修改错误
+//1:发生选项字节修改错误
+#define FLASH_OBMERR   (1 << 30)
+
+
+#define FLASH_ERROR (FLASH_WRPERR | FLASH_PGSERR | FLASH_RDPERR | FLASH_RDSERR | FLASH_OBMERR)
+
+
 
 /* FLASH_OPTCR register bits */
+
+//FMC_OBCTL 锁定位
+//当往 FMC_OBKEY 寄存器写值顺序正确时，该位由硬件清 0。软件置 1。
 #define OPT_LOCK       (1 << 0)
+
+//发送选项字节命令到 FMC
+//仅当 OBLK 设置为 0 时，该位才能由软件置 1。当 BUSY 位清 0 时由硬件清除该位。
 #define OPT_START      (1 << 1)
 
 /* FLASH_OPTSR register bits */
@@ -83,11 +160,12 @@
 #define OPTKEY1        0x08192A3B
 #define OPTKEY2        0x4C5D6E7F
 
-#define DBGMCU_IDCODE_REGISTER  0x5C001000
+#define DBGMCU_IDCODE_REGISTER  0xE00E1000
 #define FLASH_BANK0_ADDRESS     0x08000000
 #define FLASH_BANK1_ADDRESS     0x08100000
 #define FLASH_REG_BASE_B0       0x52002000
 #define FLASH_REG_BASE_B1       0x52002100
+#define FLASH_SECTOR_SIZE       0x1000
 
 /* Supported device IDs */
 #define DEVID_STM32H74_H75XX    0x450
@@ -133,76 +211,29 @@ enum stm32h7x_opt_rdp {
 	OPT_RDP_L2 = 0xcc
 };
 
-static const struct stm32h7x_rev stm32h74_h75xx_revs[] = {
-	{ 0x1000, "A" }, { 0x1001, "Z" }, { 0x1003, "Y" }, { 0x2001, "X"  }, { 0x2003, "V"  },
-};
-
-static const struct stm32h7x_rev stm32h7a_h7bxx_revs[] = {
-	{ 0x1000, "A"},
-};
-
-static const struct stm32h7x_rev stm32h72_h73xx_revs[] = {
-	{ 0x1000, "A" }, { 0x1001, "Z" },
+static const struct stm32h7x_rev gd32h759_revs[] = {
+	{ 0x2212, "IMT6" }, 
 };
 
 static uint32_t stm32h74_h75xx_compute_flash_cr(uint32_t cmd, int snb)
 {
-	return cmd | (snb << 8);
+	return cmd;
 }
 
-static uint32_t stm32h7a_h7bxx_compute_flash_cr(uint32_t cmd, int snb)
-{
-	/* save FW and START bits, to be right shifted by 2 bits later */
-	const uint32_t tmp = cmd & (FLASH_FW | FLASH_START);
-
-	/* mask parallelism (ignored), FW and START bits */
-	cmd &= ~(FLASH_PSIZE_64 | FLASH_FW | FLASH_START);
-
-	return cmd | (tmp >> 2) | (snb << 6);
-}
 
 static const struct stm32h7x_part_info stm32h7x_parts[] = {
+	//GD32H759
 	{
-	.id					= DEVID_STM32H74_H75XX,
-	.revs				= stm32h74_h75xx_revs,
-	.num_revs			= ARRAY_SIZE(stm32h74_h75xx_revs),
-	.device_str			= "STM32H74x/75x",
-	.page_size_kb		= 128,
-	.block_size			= 32,
-	.max_flash_size_kb	= 2048,
-	.max_bank_size_kb	= 1024,
-	.has_dual_bank		= true,
-	.fsize_addr			= 0x1FF1E880,
-	.wps_group_size		= 1,
-	.wps_mask			= 0xFF,
-	.compute_flash_cr	= stm32h74_h75xx_compute_flash_cr,
-	},
-	{
-	.id					= DEVID_STM32H7A_H7BXX,
-	.revs				= stm32h7a_h7bxx_revs,
-	.num_revs			= ARRAY_SIZE(stm32h7a_h7bxx_revs),
-	.device_str			= "STM32H7Ax/7Bx",
-	.page_size_kb		= 8,
-	.block_size			= 16,
-	.max_flash_size_kb	= 2048,
-	.max_bank_size_kb	= 1024,
-	.has_dual_bank		= true,
-	.fsize_addr			= 0x08FFF80C,
-	.wps_group_size		= 4,
-	.wps_mask			= 0xFFFFFFFF,
-	.compute_flash_cr	= stm32h7a_h7bxx_compute_flash_cr,
-	},
-	{
-	.id					= DEVID_STM32H72_H73XX,
-	.revs				= stm32h72_h73xx_revs,
-	.num_revs			= ARRAY_SIZE(stm32h72_h73xx_revs),
-	.device_str			= "STM32H72x/73x",
-	.page_size_kb		= 128,
+	.id					= 0x418,
+	.revs				= gd32h759_revs,
+	.num_revs			= ARRAY_SIZE(gd32h759_revs),
+	.device_str			= "GD32H759",
+	.page_size_kb		= 4,
 	.block_size			= 32,
 	.max_flash_size_kb	= 1024,
 	.max_bank_size_kb	= 1024,
 	.has_dual_bank		= false,
-	.fsize_addr			= 0x1FF1E880,
+	.fsize_addr			= 0x1FF0F7E0,
 	.wps_group_size		= 1,
 	.wps_mask			= 0xFF,
 	.compute_flash_cr   = stm32h74_h75xx_compute_flash_cr,
@@ -271,7 +302,7 @@ static int stm32x_wait_flash_op_queue(struct flash_bank *bank, int timeout)
 		if (retval != ERROR_OK)
 			return retval;
 
-		if ((status & FLASH_QW) == 0)
+		if ((status & FLASH_BSY) == 0) //操作结束
 			break;
 
 		if (timeout-- <= 0) {
@@ -472,34 +503,37 @@ static int stm32x_erase(struct flash_bank *bank, unsigned int first,
 	if (bank->target->state != TARGET_HALTED)
 		return ERROR_TARGET_NOT_HALTED;
 
+
 	retval = stm32x_unlock_reg(bank);
 	if (retval != ERROR_OK)
 		goto flash_lock;
 
-	/*
-	Sector Erase
-	To erase a sector, follow the procedure below:
-	1. Check that no Flash memory operation is ongoing by checking the QW bit in the
-	  FLASH_SR register
-	2. Set the SER bit and select the sector
-	  you wish to erase (SNB) in the FLASH_CR register
-	3. Set the STRT bit in the FLASH_CR register
-	4. Wait for flash operations completion
-	 */
+	
 	for (unsigned int i = first; i <= last; i++) {
-		LOG_DEBUG("erase sector %u", i);
+		uint32_t erase_address = FLASH_BANK0_ADDRESS + i * FLASH_SECTOR_SIZE;
+		LOG_INFO("erase sector %u address:0x%x", i, erase_address);
+
 		retval = stm32x_write_flash_reg(bank, FLASH_CR,
-				stm32x_info->part_info->compute_flash_cr(FLASH_SER | FLASH_PSIZE_64, i));
+				stm32x_info->part_info->compute_flash_cr(FLASH_SER, 0));
+		if (retval != ERROR_OK) {
+			LOG_ERROR("Error erase sector %u write FLASH_CR->FLASH_SER", i);
+			goto flash_lock;
+		}
+
+		retval = stm32x_write_flash_reg(bank, FLASH_CCR, erase_address);
+		if (retval != ERROR_OK) {
+			LOG_ERROR("Error erase sector %u write FLASH_CCR 0x%x", i, erase_address);
+			goto flash_lock;
+		}
+
+		retval = stm32x_write_flash_reg(bank, FLASH_CR,
+				stm32x_info->part_info->compute_flash_cr(FLASH_SER | FLASH_START, i));
 		if (retval != ERROR_OK) {
 			LOG_ERROR("Error erase sector %u", i);
 			goto flash_lock;
 		}
-		retval = stm32x_write_flash_reg(bank, FLASH_CR,
-				stm32x_info->part_info->compute_flash_cr(FLASH_SER | FLASH_PSIZE_64 | FLASH_START, i));
-		if (retval != ERROR_OK) {
-			LOG_ERROR("Error erase sector %u", i);
-			goto flash_lock;
-		}
+
+
 		retval = stm32x_wait_flash_op_queue(bank, FLASH_ERASE_TIMEOUT);
 
 		if (retval != ERROR_OK) {
@@ -712,7 +746,7 @@ static int stm32x_write(struct flash_bank *bank, const uint8_t *buffer,
 	*/
 	while (blocks_remaining > 0) {
 		retval = stm32x_write_flash_reg(bank, FLASH_CR,
-				stm32x_info->part_info->compute_flash_cr(FLASH_PG | FLASH_PSIZE_64, 0));
+				stm32x_info->part_info->compute_flash_cr(FLASH_PG, 0));
 		if (retval != ERROR_OK)
 			goto flash_lock;
 
@@ -828,6 +862,9 @@ static int stm32x_probe(struct flash_bank *bank)
 			flash_size_in_kb /= 2;
 		break;
 	case DEVID_STM32H72_H73XX:
+		break;
+	case 0x418: //GD32H759
+		LOG_INFO("Device: GD32H759");
 		break;
 	default:
 		LOG_ERROR("unsupported device");
@@ -1057,12 +1094,12 @@ static int stm32x_mass_erase(struct flash_bank *bank)
 
 	/* mass erase flash memory bank */
 	retval = stm32x_write_flash_reg(bank, FLASH_CR,
-			stm32x_info->part_info->compute_flash_cr(FLASH_BER | FLASH_PSIZE_64, 0));
+			stm32x_info->part_info->compute_flash_cr(FLASH_BER, 0));
 	if (retval != ERROR_OK)
 		goto flash_lock;
 
 	retval = stm32x_write_flash_reg(bank, FLASH_CR,
-			stm32x_info->part_info->compute_flash_cr(FLASH_BER | FLASH_PSIZE_64 | FLASH_START, 0));
+			stm32x_info->part_info->compute_flash_cr(FLASH_BER | FLASH_START, 0));
 	if (retval != ERROR_OK)
 		goto flash_lock;
 
